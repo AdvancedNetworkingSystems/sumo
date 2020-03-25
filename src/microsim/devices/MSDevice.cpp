@@ -44,6 +44,7 @@
 #include "MSTransportableDevice_Routing.h"
 #include "MSTransportableDevice_FCD.h"
 #include "MSRoutingEngine.h"
+#include "MSDevice_Slipstream.h"
 
 
 // ===========================================================================
@@ -80,6 +81,7 @@ MSDevice::insertOptions(OptionsCont& oc) {
     MSDevice_ElecHybrid::insertOptions(oc);
     MSDevice_Taxi::insertOptions(oc);
     MSDevice_Tripinfo::insertOptions(oc);
+    MSDevice_Slipstream::insertOptions(oc);
 
     MSTransportableDevice_Routing::insertOptions(oc);
     MSTransportableDevice_FCD::insertOptions(oc);
@@ -111,6 +113,7 @@ MSDevice::buildVehicleDevices(SUMOVehicle& v, std::vector<MSVehicleDevice*>& int
     MSDevice_FCD::buildVehicleDevices(v, into);
     MSDevice_ElecHybrid::buildVehicleDevices(v, into);
     MSDevice_Taxi::buildVehicleDevices(v, into);
+    MSDevice_Slipstream::buildVehicleDevices(v, into);
 }
 
 
