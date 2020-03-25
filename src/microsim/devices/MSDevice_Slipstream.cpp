@@ -116,14 +116,16 @@ MSDevice_Slipstream::~MSDevice_Slipstream() {
 bool
 MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
                              double /* newPos */, double newSpeed) {
+    if (!tObject.isVehicle()) {
+        return false;
+    }
+    SUMOVehicle& veh = static_cast<SUMOVehicle&>(tObject);
     std::cout << "device '" << getID() << "' notifyMove: newSpeed=" << newSpeed << "\n";
-    if (tObject.isVehicle()) {
-        SUMOVehicle& veh = static_cast<SUMOVehicle&>(tObject);
-        // check whether another device is present on the vehicle:
-        MSDevice_Tripinfo* otherDevice = static_cast<MSDevice_Tripinfo*>(veh.getDevice(typeid(MSDevice_Tripinfo)));
-        if (otherDevice != nullptr) {
-            std::cout << "  veh '" << veh.getID() << " has device '" << otherDevice->getID() << "'\n";
-        }
+
+    // check whether another device is present on the vehicle:
+    MSDevice_Tripinfo* otherDevice = static_cast<MSDevice_Tripinfo*>(veh.getDevice(typeid(MSDevice_Tripinfo)));
+    if (otherDevice != nullptr) {
+        std::cout << "  veh '" << veh.getID() << " has device '" << otherDevice->getID() << "'\n";
     }
     return true; // keep the device
 }
