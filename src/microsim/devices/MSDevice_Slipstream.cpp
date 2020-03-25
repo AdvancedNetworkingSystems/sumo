@@ -103,8 +103,9 @@ MSDevice_Slipstream::MSDevice_Slipstream(SUMOVehicle& holder, const std::string&
         MSVehicleDevice(holder, id),
         myCustomValue1(customValue1),
         myCustomValue2(customValue2),
-        myCustomValue3(customValue3) {
-    std::cout << "initialized device '" << id << "' with myCustomValue1=" << myCustomValue1 << ", myCustomValue2=" << myCustomValue2 << ", myCustomValue3=" << myCustomValue3 << "\n";
+        myCustomValue3(customValue3),
+        myDragCoefficient(-1.){
+    std::cout << "initialized device '" << id << "' with myCustomValue1=" << myCustomValue1 << ", myCustomValue2=" << myCustomValue2 << ", myCustomValue3=" << myCustomValue3 << ", myDragCoefficient=" << myDragCoefficient << "\n";
 }
 
 
@@ -160,6 +161,8 @@ MSDevice_Slipstream::getParameter(const std::string& key) const {
         return toString(myCustomValue2);
     } else if (key == "meaningOfLife") {
         return "42";
+    } else if (key == "dragCoefficient") {
+        return toString(myDragCoefficient);
     }
     throw InvalidArgument("Parameter '" + key + "' is not supported for device of type '" + deviceName() + "'");
 }

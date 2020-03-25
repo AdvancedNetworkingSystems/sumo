@@ -138,6 +138,12 @@ public:
 
 
 
+protected:
+    /// @brief the vehicle's current drag coefficient
+    double myDragCoefficient;
+
+
+
 private:
     /** @brief Constructor
      *
