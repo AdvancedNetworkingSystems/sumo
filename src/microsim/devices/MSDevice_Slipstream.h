@@ -167,6 +167,9 @@ private:
     /// @brief a value which is initialised based on a vType parameter
     double myCustomValue3;
 
+    /// @brief the vehicle's predecessors
+    std::vector<std::pair<const MSVehicle* const, double>> precedingVehicles;
+
 
 
 private:

@@ -36,6 +36,15 @@
 #include "MSDevice_Tripinfo.h"
 #include "MSDevice_Slipstream.h"
 
+// Debug switches
+#define DEBUG_PRECEDING_VEHICLES
+
+// Constants
+const double MAX_TOT_DIST = 120.;
+const double MAX_GAP = 20.;
+
+
+
 
 // ===========================================================================
 // method definitions
@@ -127,6 +136,49 @@ MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
     if (otherDevice != nullptr) {
         std::cout << "  veh '" << veh->getID() << " has device '" << otherDevice->getID() << "'\n";
     }
+
+    precedingVehicles.clear();
+
+    double remaining = MAX_TOT_DIST;
+
+    const MSVehicle* last = veh;
+    while (remaining > 0.) {
+        // See https://github.com/eclipse/sumo/pull/6822
+        std::pair<const MSVehicle* const, double> leader = last->getLeader(2 * MAX_GAP);
+
+        if (leader.first == nullptr)
+            break;
+        if (leader.second > MAX_GAP) {
+#ifdef DEBUG_PRECEDING_VEHICLES
+            std::cout << leader.first->getID() << "'s gap from " << last->getID() << " exceeds maximum by " << leader.second - MAX_GAP << std::endl;
+#endif
+            break;
+        }
+        double gapAndLength = leader.second + leader.first->getLength();
+        if (remaining - gapAndLength < 0.) {
+#ifdef DEBUG_PRECEDING_VEHICLES
+            std::cout << leader.first->getID() << "'s distance from " << veh->getID() << " exceeds maximum by " << gapAndLength - remaining << std::endl;
+#endif
+            break;
+        }
+
+        precedingVehicles.push_back(leader);
+        remaining -= gapAndLength;
+        last = leader.first;
+    }
+
+#ifdef DEBUG_PRECEDING_VEHICLES
+    std::cout << "Preceding vehicles: " << std::endl;
+    if (!precedingVehicles.empty()) {
+        for(auto& item : precedingVehicles)
+        {
+            std::cout << " [" << item.second << " m] " << item.first->getID();;
+        }
+        std::cout << std::endl;
+    } else
+        std::cout << "No preceding vehicles." << std::endl;
+#endif
+
     return true; // keep the device
 }
 
