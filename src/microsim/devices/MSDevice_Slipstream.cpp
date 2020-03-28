@@ -37,6 +37,7 @@
 #include "MSDevice_Slipstream.h"
 
 // Debug switches
+#define DEBUG_INIT
 #define DEBUG_PRECEDING_VEHICLES
 
 // Constants
@@ -56,9 +57,6 @@ void
 MSDevice_Slipstream::insertOptions(OptionsCont& oc) {
     oc.addOptionSubTopic("Slipstream Device");
     insertDefaultAssignmentOptions("slipstream", "Slipstream Device", oc);
-
-    oc.doRegister("device.slipstream.parameter", new Option_Float(0.0));
-    oc.addDescription("device.slipstream.parameter", "Slipstream Device", "An exemplary parameter which can be used by all instances of the slipstream device");
 }
 
 
@@ -67,34 +65,7 @@ MSDevice_Slipstream::buildVehicleDevices(SUMOVehicle& v, std::vector<MSVehicleDe
     OptionsCont& oc = OptionsCont::getOptions();
     if (equippedByDefaultAssignmentOptions(oc, "slipstream", v, false)) {
         // build the device
-        // get custom vehicle parameter
-        double customParameter2 = -1;
-        if (v.getParameter().knowsParameter("slipstream")) {
-            try {
-                customParameter2 = StringUtils::toDouble(v.getParameter().getParameter("slipstream", "-1"));
-            } catch (...) {
-                WRITE_WARNING("Invalid value '" + v.getParameter().getParameter("slipstream", "-1") + "'for vehicle parameter 'slipstream'");
-            }
-
-        } else {
-            std::cout << "vehicle '" << v.getID() << "' does not supply vehicle parameter 'slipstream'. Using default of " << customParameter2 << "\n";
-        }
-        // get custom vType parameter
-        double customParameter3 = -1;
-        if (v.getVehicleType().getParameter().knowsParameter("slipstream")) {
-            try {
-                customParameter3 = StringUtils::toDouble(v.getVehicleType().getParameter().getParameter("slipstream", "-1"));
-            } catch (...) {
-                WRITE_WARNING("Invalid value '" + v.getVehicleType().getParameter().getParameter("slipstream", "-1") + "'for vType parameter 'slipstream'");
-            }
-
-        } else {
-            std::cout << "vehicle '" << v.getID() << "' does not supply vType parameter 'slipstream'. Using default of " << customParameter3 << "\n";
-        }
-        MSDevice_Slipstream* device = new MSDevice_Slipstream(v, "slipstream_" + v.getID(),
-                                                        oc.getFloat("device.slipstream.parameter"),
-                                                        customParameter2,
-                                                        customParameter3);
+        MSDevice_Slipstream* device = new MSDevice_Slipstream(v, "slipstream_" + v.getID());
         into.push_back(device);
     }
 }
@@ -107,14 +78,12 @@ MSDevice_Slipstream::cleanup() {
 // ---------------------------------------------------------------------------
 // MSDevice_Slipstream-methods
 // ---------------------------------------------------------------------------
-MSDevice_Slipstream::MSDevice_Slipstream(SUMOVehicle& holder, const std::string& id,
-                                   double customValue1, double customValue2, double customValue3) :
+MSDevice_Slipstream::MSDevice_Slipstream(SUMOVehicle& holder, const std::string& id) :
         MSVehicleDevice(holder, id),
-        myCustomValue1(customValue1),
-        myCustomValue2(customValue2),
-        myCustomValue3(customValue3),
         myDragCoefficient(-1.){
-    std::cout << "initialized device '" << id << "' with myCustomValue1=" << myCustomValue1 << ", myCustomValue2=" << myCustomValue2 << ", myCustomValue3=" << myCustomValue3 << ", myDragCoefficient=" << myDragCoefficient << "\n";
+#ifdef DEBUG_INIT
+    std::cout << "initialized device '" << id << "' with myDragCoefficient=" << myDragCoefficient << std::endl;
+#endif
 }
 
 
@@ -124,18 +93,14 @@ MSDevice_Slipstream::~MSDevice_Slipstream() {
 
 bool
 MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
-                             double /* newPos */, double newSpeed) {
+                             double /* newPos */, double /* newSpeed */) {
     if (!tObject.isVehicle()) {
         return false;
     }
     MSVehicle* veh = static_cast<MSVehicle*>(&tObject);
-    std::cout << "device '" << getID() << "' notifyMove: newSpeed=" << newSpeed << "\n";
-
-    // check whether another device is present on the vehicle:
-    MSDevice_Tripinfo* otherDevice = static_cast<MSDevice_Tripinfo*>(veh->getDevice(typeid(MSDevice_Tripinfo)));
-    if (otherDevice != nullptr) {
-        std::cout << "  veh '" << veh->getID() << " has device '" << otherDevice->getID() << "'\n";
-    }
+#ifdef DEBUG_PRECEDING_VEHICLES
+    std::cout << "device '" << getID() << "' notifyMove" << std::endl;
+#endif
 
     precedingVehicles.clear();
 
@@ -179,62 +144,16 @@ MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
         std::cout << "No preceding vehicles." << std::endl;
 #endif
 
-    return true; // keep the device
+    return true;
 }
 
-
-bool
-MSDevice_Slipstream::notifyEnter(SUMOTrafficObject& veh, MSMoveReminder::Notification reason, const MSLane* /* enteredLane */) {
-    std::cout << "device '" << getID() << "' notifyEnter: reason=" << reason << " currentEdge=" << veh.getEdge()->getID() << "\n";
-    return true; // keep the device
-}
-
-
-bool
-MSDevice_Slipstream::notifyLeave(SUMOTrafficObject& veh, double /*lastPos*/, MSMoveReminder::Notification reason, const MSLane* /* enteredLane */) {
-    std::cout << "device '" << getID() << "' notifyLeave: reason=" << reason << " currentEdge=" << veh.getEdge()->getID() << "\n";
-    return true; // keep the device
-}
-
-
-void
-MSDevice_Slipstream::generateOutput(OutputDevice* tripinfoOut) const {
-    if (tripinfoOut != nullptr) {
-        tripinfoOut->openTag("slipstream_device");
-        tripinfoOut->writeAttr("customValue1", toString(myCustomValue1));
-        tripinfoOut->writeAttr("customValue2", toString(myCustomValue2));
-        tripinfoOut->closeTag();
-    }
-}
 
 std::string
 MSDevice_Slipstream::getParameter(const std::string& key) const {
-    if (key == "customValue1") {
-        return toString(myCustomValue1);
-    } else if (key == "customValue2") {
-        return toString(myCustomValue2);
-    } else if (key == "meaningOfLife") {
-        return "42";
-    } else if (key == "dragCoefficient") {
+    if (key == "dragCoefficient") {
         return toString(myDragCoefficient);
     }
     throw InvalidArgument("Parameter '" + key + "' is not supported for device of type '" + deviceName() + "'");
-}
-
-
-void
-MSDevice_Slipstream::setParameter(const std::string& key, const std::string& value) {
-    double doubleValue;
-    try {
-        doubleValue = StringUtils::toDouble(value);
-    } catch (NumberFormatException&) {
-        throw InvalidArgument("Setting parameter '" + key + "' requires a number for device of type '" + deviceName() + "'");
-    }
-    if (key == "customValue1") {
-        myCustomValue1 = doubleValue;
-    } else {
-        throw InvalidArgument("Setting parameter '" + key + "' is not supported for device of type '" + deviceName() + "'");
-    }
 }
 
 

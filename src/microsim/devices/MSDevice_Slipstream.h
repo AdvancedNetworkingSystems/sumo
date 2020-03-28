@@ -93,30 +93,6 @@ public:
                     double newPos, double newSpeed);
 
 
-    /** @brief Saves departure info on insertion
-     *
-     * @param[in] veh The entering vehicle.
-     * @param[in] reason how the vehicle enters the lane
-     * @return Always true
-     * @see MSMoveReminder::notifyEnter
-     * @see MSMoveReminder::Notification
-     */
-    bool notifyEnter(SUMOTrafficObject& veh, MSMoveReminder::Notification reason, const MSLane* enteredLane = 0);
-
-
-    /** @brief Saves arrival info
-     *
-     * @param[in] veh The leaving vehicle.
-     * @param[in] lastPos Position on the lane when leaving.
-     * @param[in] isArrival whether the vehicle arrived at its destination
-     * @param[in] isLaneChange whether the vehicle changed from the lane
-     * @return True if it did not leave the net.
-     */
-    bool notifyLeave(SUMOTrafficObject& veh, double lastPos,
-                     MSMoveReminder::Notification reason, const MSLane* enteredLane = 0);
-    /// @}
-
-
     /// @brief return the name for this type of device
     const std::string deviceName() const {
         return "slipstream";
@@ -124,17 +100,6 @@ public:
 
     /// @brief try to retrieve the given parameter from this device. Throw exception for unsupported key
     std::string getParameter(const std::string& key) const;
-
-    /// @brief try to set the given parameter for this device. Throw exception for unsupported key
-    void setParameter(const std::string& key, const std::string& value);
-
-    /** @brief Called on writing tripinfo output
-     *
-     * @param[in] os The stream to write the information into
-     * @exception IOError not yet implemented
-     * @see MSDevice::generateOutput
-     */
-    void generateOutput(OutputDevice* tripinfoOut) const;
 
 
 
@@ -150,22 +115,12 @@ private:
      * @param[in] holder The vehicle that holds this device
      * @param[in] id The ID of the device
      */
-    MSDevice_Slipstream(SUMOVehicle& holder, const std::string& id, double customValue1,
-                     double customValue2, double customValue3);
+    MSDevice_Slipstream(SUMOVehicle& holder, const std::string& id);
 
 
 
 private:
     // private state members of the Slipstream device
-
-    /// @brief a value which is initialised based on a commandline/configuration option
-    double myCustomValue1;
-
-    /// @brief a value which is initialised based on a vehicle parameter
-    double myCustomValue2;
-
-    /// @brief a value which is initialised based on a vType parameter
-    double myCustomValue3;
 
     /// @brief the vehicle's predecessors
     std::vector<std::pair<const MSVehicle* const, double>> precedingVehicles;
