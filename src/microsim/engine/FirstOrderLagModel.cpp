@@ -23,9 +23,19 @@
 #include "utils/common/StdDefs.h"
 #include <algorithm>
 
+#define DEFAULT_FOL_TAU_S 0.5
+#define DEFAULT_FOL_DT_S 0.01
+#define FOL_CLASS_NAME "FirstOrderLagModel"
+
 FirstOrderLagModel::FirstOrderLagModel() : GenericEngineModel(),
-    tau_s(0.5), dt_s(0.01) {
-    className = "FirstOrderLagModel";
+    tau_s(DEFAULT_FOL_TAU_S), dt_s(DEFAULT_FOL_DT_S) {
+    className = FOL_CLASS_NAME;
+    computeParameters();
+}
+FirstOrderLagModel::FirstOrderLagModel(MSVehicle* veh) : GenericEngineModel(veh) {
+    tau_s = DEFAULT_FOL_TAU_S;
+    dt_s = DEFAULT_FOL_DT_S;
+    className = FOL_CLASS_NAME;
     computeParameters();
 }
 FirstOrderLagModel::~FirstOrderLagModel() {}

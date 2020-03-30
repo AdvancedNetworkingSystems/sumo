@@ -36,7 +36,7 @@
 #include "utils/common/StdDefs.h"
 #include <algorithm>
 
-RealisticEngineModel::RealisticEngineModel() {
+RealisticEngineModel::RealisticEngineModel(MSVehicle* veh) : GenericEngineModel(veh) {
     className = "RealisticEngineModel";
     dt_s = 0.01;
     xmlFile = "vehicles.xml";

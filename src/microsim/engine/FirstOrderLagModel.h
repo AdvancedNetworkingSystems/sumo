@@ -44,6 +44,7 @@ protected:
 
 public:
     FirstOrderLagModel();
+    FirstOrderLagModel(MSVehicle* veh);
     virtual ~FirstOrderLagModel();
 
     /**

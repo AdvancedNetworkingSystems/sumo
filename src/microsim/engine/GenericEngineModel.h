@@ -23,6 +23,7 @@
 #include <map>
 #include <string>
 #include <utils/common/SUMOTime.h>
+#include <microsim/MSVehicle.h>
 
 /**
  * This is an interface for plexe engine models. It provides two virtual methods
@@ -41,6 +42,8 @@ protected:
     std::string className;
     //minimum and maximum acceleration of the model, if any
     double maxAcceleration_mpsps, maxDeceleration_mpsps;
+    //vehicle on which this model is running
+    MSVehicle* veh;
 
     /**
      * Prints a parameter error
@@ -56,7 +59,10 @@ protected:
 
 public:
 
-    GenericEngineModel() : maxAcceleration_mpsps(1.5), maxDeceleration_mpsps(7) {};
+    GenericEngineModel() : maxAcceleration_mpsps(1.5), maxDeceleration_mpsps(7), veh(nullptr) {}
+    GenericEngineModel(MSVehicle* veh) : GenericEngineModel() {
+        this->veh = veh;
+    }
     virtual ~GenericEngineModel() {};
 
     /**

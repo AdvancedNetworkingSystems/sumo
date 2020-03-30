@@ -321,7 +321,7 @@ protected:
     double getRealBrakingAcceleration(double speed_mps, double accel_mps2, double reqAccel_mps2, SUMOTime t);
 
 public:
-    RealisticEngineModel();
+    RealisticEngineModel(MSVehicle* veh);
     virtual ~RealisticEngineModel();
 
     /**

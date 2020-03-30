@@ -790,7 +790,7 @@ void MSCFModel_CC::setParameter(MSVehicle* veh, const std::string& key, const st
             int engineModel = StringUtils::toInt(value.c_str());
             switch (engineModel) {
                 case CC_ENGINE_MODEL_REALISTIC: {
-                    vars->engine = new RealisticEngineModel();
+                    vars->engine = new RealisticEngineModel(veh);
                     vars->engine->setParameter(ENGINE_PAR_DT, TS);
                     veh->getInfluencer().setSpeedMode(0);
                     vars->engineModel = CC_ENGINE_MODEL_REALISTIC;
@@ -798,7 +798,7 @@ void MSCFModel_CC::setParameter(MSVehicle* veh, const std::string& key, const st
                 }
                 case CC_ENGINE_MODEL_FOLM:
                 default: {
-                    vars->engine = new FirstOrderLagModel();
+                    vars->engine = new FirstOrderLagModel(veh);
                     vars->engine->setParameter(FOLM_PAR_DT, TS);
                     vars->engine->setParameter(FOLM_PAR_TAU, vars->engineTau);
                     vars->engineModel = CC_ENGINE_MODEL_FOLM;
