@@ -64,8 +64,20 @@ void
 MSDevice_Slipstream::buildVehicleDevices(SUMOVehicle& v, std::vector<MSVehicleDevice*>& into) {
     OptionsCont& oc = OptionsCont::getOptions();
     if (equippedByDefaultAssignmentOptions(oc, "slipstream", v, false)) {
+        const SUMOVTypeParameter& typeParams = v.getVehicleType().getParameter();
+
         // build the device
-        MSDevice_Slipstream* device = new MSDevice_Slipstream(v, "slipstream_" + v.getID());
+        // get custom vType parameter
+        double myRefDragCoefficient;
+        if (! typeParams.knowsParameter("dragCoefficient"))
+            throw ProcessError("vehicle '" + v.getID() + "' does not supply vehicle parameter 'dragCoefficient'");
+        try {
+            myRefDragCoefficient = typeParams.getDouble("dragCoefficient", -1);
+        } catch (...) {
+            throw ProcessError("Invalid value '" + typeParams.getParameter("dragCoefficient", "-1") + "'for vehicle parameter 'dragCoefficient'");
+        }
+
+        MSDevice_Slipstream* device = new MSDevice_Slipstream(v, "slipstream_" + v.getID(), myRefDragCoefficient);
         into.push_back(device);
     }
 }
@@ -78,16 +90,22 @@ MSDevice_Slipstream::cleanup() {
 // ---------------------------------------------------------------------------
 // MSDevice_Slipstream-methods
 // ---------------------------------------------------------------------------
-MSDevice_Slipstream::MSDevice_Slipstream(SUMOVehicle& holder, const std::string& id) :
+MSDevice_Slipstream::MSDevice_Slipstream(SUMOVehicle& holder, const std::string& id, const double myRefDragCoefficient) :
         MSVehicleDevice(holder, id),
+        myRefDragCoefficient(myRefDragCoefficient),
         myDragCoefficient(-1.){
 #ifdef DEBUG_INIT
-    std::cout << "initialized device '" << id << "' with myDragCoefficient=" << myDragCoefficient << std::endl;
+    std::cout << "initialized device '" << id << "' with myDragCoefficient=" << myDragCoefficient << ", myRefDragCoefficient=" << this->myRefDragCoefficient << std::endl;
 #endif
 }
 
 
 MSDevice_Slipstream::~MSDevice_Slipstream() {
+}
+
+
+double MSDevice_Slipstream::getDragCoefficient() const {
+    return myDragCoefficient;
 }
 
 

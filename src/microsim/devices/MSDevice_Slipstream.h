@@ -103,7 +103,16 @@ public:
 
 
 
+public:
+    double getDragCoefficient() const;
+
+
+
 protected:
+    /// @brief the vehicle's drag coefficient, measured with wind tunnel tests
+    const double myRefDragCoefficient;
+
+
     /// @brief the vehicle's current drag coefficient
     double myDragCoefficient;
 
@@ -115,7 +124,7 @@ private:
      * @param[in] holder The vehicle that holds this device
      * @param[in] id The ID of the device
      */
-    MSDevice_Slipstream(SUMOVehicle& holder, const std::string& id);
+    MSDevice_Slipstream(SUMOVehicle& holder, const std::string& id, const double myRefDragCoefficient);
 
 
 
