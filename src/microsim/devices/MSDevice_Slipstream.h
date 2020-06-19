@@ -117,6 +117,11 @@ protected:
     double myDragCoefficient;
 
 
+protected:
+    /// @brief computes and updates the vehicle's current drag coefficient
+    void computeDragCoefficient();
+
+
 
 private:
     /** @brief Constructor

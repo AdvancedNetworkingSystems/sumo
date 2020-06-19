@@ -29,16 +29,18 @@
 #include <utils/options/OptionsCont.h>
 #include <utils/iodevices/OutputDevice.h>
 #include <utils/vehicle/SUMOVehicle.h>
-#include <microsim/MSNet.h>
-#include <microsim/MSLane.h>
 #include <microsim/MSEdge.h>
 #include <microsim/MSVehicle.h>
 #include "MSDevice_Tripinfo.h"
 #include "MSDevice_Slipstream.h"
+#include <microsim/cfd/Cfd.h>
+
+#include <vector>
 
 // Debug switches
 #define DEBUG_INIT
 #define DEBUG_PRECEDING_VEHICLES
+#define DEBUG_DRAG_COEFFICIENT
 
 // Constants
 const double MAX_TOT_DIST = 120.;
@@ -109,6 +111,30 @@ double MSDevice_Slipstream::getDragCoefficient() const {
 }
 
 
+void MSDevice_Slipstream::computeDragCoefficient() {
+    std::string vehicleType = getHolder().getVehicleType().getOriginalID();
+
+    std::vector<std::string> precedingVehiclesTypes;
+    for (auto& item : precedingVehicles) {
+        precedingVehiclesTypes.push_back(item.first->getVehicleType().getOriginalID());
+    }
+
+    double interVehicleDistance = 0;
+    if (! precedingVehicles.empty()) {
+        // Todo: make sure that all the preceding vehicles have (roughly) the same mutual distance
+        interVehicleDistance = precedingVehicles.front().second;
+    }
+
+    double reduction = Cfd::getDragCoefficientReduction(vehicleType, precedingVehiclesTypes, interVehicleDistance);
+
+    myDragCoefficient = myRefDragCoefficient * (100. - reduction) * 0.01;
+
+#ifdef DEBUG_DRAG_COEFFICIENT
+    std::cout << "Drag coefficient: " << myRefDragCoefficient << " -> " << myDragCoefficient << std::endl;
+#endif
+}
+
+
 bool
 MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
                              double /* newPos */, double /* newSpeed */) {
@@ -155,12 +181,15 @@ MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
     if (!precedingVehicles.empty()) {
         for(auto& item : precedingVehicles)
         {
-            std::cout << " [" << item.second << " m] " << item.first->getID();;
+            std::cout << "[" << item.second << " m] " << item.first->getID() << " ";
         }
         std::cout << std::endl;
-    } else
+    } else {
         std::cout << "No preceding vehicles." << std::endl;
+    }
 #endif
+
+    computeDragCoefficient();
 
     return true;
 }
