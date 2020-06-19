@@ -32,6 +32,7 @@
 #include <microsim/MSVehicle.h>
 #include "MSDevice_Tripinfo.h"
 #include "MSDevice_Battery.h"
+#include "MSDevice_Slipstream.h"
 
 #define DEFAULT_MAX_CAPACITY 35000
 #define DEFAULT_CHARGE_RATIO 0.5
@@ -105,6 +106,11 @@ bool MSDevice_Battery::notifyMove(SUMOTrafficObject& tObject, double /* oldPos *
     } else {
         // Reset vehicle Stopped
         resetVehicleStoppedTimer();
+    }
+
+    MSDevice_Slipstream* slipstream = dynamic_cast<MSDevice_Slipstream*>(veh.getDevice(typeid(MSDevice_Slipstream)));
+    if (slipstream != nullptr) {
+        myParam[SUMO_ATTR_AIRDRAGCOEFFICIENT] = slipstream->getDragCoefficient();
     }
 
     // Update Energy from the battery
