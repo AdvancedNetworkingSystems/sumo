@@ -1,4 +1,5 @@
 add_subdirectory(actions)
+add_subdirectory(cfd)
 add_subdirectory(cfmodels)
 add_subdirectory(devices)
 add_subdirectory(engine)
