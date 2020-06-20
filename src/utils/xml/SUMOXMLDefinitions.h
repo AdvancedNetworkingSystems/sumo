@@ -619,6 +619,14 @@ enum SumoXMLAttr {
     SUMO_ATTR_CHARGEDELAY,
     /// @}
 
+    /// @name Slipstream device parameters
+    /// @{
+    /// @brief Drag coefficient that the vehicle takes when isolated
+    SUMO_ATTR_REFERENCEDRAGCOEFFIICENT,
+    /// @brief Current drag coefficient of the vehicle
+    SUMO_ATTR_ACTUALDRAGOCEFFICIENT,
+    /// @}
+
     /// @name battery device parameters
     /// @{
     /// @brief Actual battery capacity

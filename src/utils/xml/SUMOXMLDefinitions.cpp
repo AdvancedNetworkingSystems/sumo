@@ -419,6 +419,9 @@ StringBijection<int>::Entry SUMOXMLDefinitions::attrs[] = {
     { "efficiency",             SUMO_ATTR_EFFICIENCY },
     { "chargeInTransit",        SUMO_ATTR_CHARGEINTRANSIT },
     { "chargeDelay",            SUMO_ATTR_CHARGEDELAY},
+    // MSDevice_Slipstream
+    { "referenceDragCoefficient",       SUMO_ATTR_REFERENCEDRAGCOEFFIICENT},
+    { "actualDragCoefficient",          SUMO_ATTR_ACTUALDRAGOCEFFICIENT},
     // MSDevice_Battery
     { "actualBatteryCapacity",          SUMO_ATTR_ACTUALBATTERYCAPACITY },
     { "maximumBatteryCapacity",         SUMO_ATTR_MAXIMUMBATTERYCAPACITY },

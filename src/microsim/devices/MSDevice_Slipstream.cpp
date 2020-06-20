@@ -197,7 +197,9 @@ MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
 
 std::string
 MSDevice_Slipstream::getParameter(const std::string& key) const {
-    if (key == "dragCoefficient") {
+    if (key == toString(SUMO_ATTR_REFERENCEDRAGCOEFFIICENT)) {
+        return toString(myRefDragCoefficient);
+    } else if (key == toString(SUMO_ATTR_ACTUALDRAGOCEFFICIENT)) {
         return toString(myDragCoefficient);
     }
     throw InvalidArgument("Parameter '" + key + "' is not supported for device of type '" + deviceName() + "'");
