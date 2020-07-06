@@ -127,7 +127,7 @@ void MSDevice_Slipstream::computeDragCoefficient() {
 
     double reduction = Cfd::getDragCoefficientReduction(vehicleType, precedingVehiclesTypes, interVehicleDistance);
 
-    myDragCoefficient = myRefDragCoefficient * (100. - reduction) * 0.01;
+    myDragCoefficient = myRefDragCoefficient * (100. + reduction) / 100;
 
 #ifdef DEBUG_DRAG_COEFFICIENT
     std::cout << "Drag coefficient: " << myRefDragCoefficient << " -> " << myDragCoefficient << std::endl;
