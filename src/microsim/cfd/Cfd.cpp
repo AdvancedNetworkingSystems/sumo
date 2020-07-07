@@ -181,8 +181,8 @@ Cfd::getDragCoefficientReduction_Impl(const std::string &vehicleType,
         return 0.;
     }
 #ifdef DEBUG_ALGORITHM
-    std::cout << "Platoons that have a compatible geometry and have a lower inter-vehicle distance:" << std::endl;
-    for (auto &p: haveLowerIVDistance) {
+    std::cout << "Compatible platoons with longer inter-vehicle distances:" << std::endl;
+    for (auto &p: haveGreaterIVDistance) {
         for (auto &v : p->vehicles) {
             if (v != p->getLeader()) {
                 std::cout << "[ " << v->precedingVehicle.second << " m ] ";
@@ -191,8 +191,8 @@ Cfd::getDragCoefficientReduction_Impl(const std::string &vehicleType,
         }
         std::cout << std::endl;
     }
-    std::cout << "Platoons that have a compatible geometry and have a greater inter-vehicle distance:" << std::endl;
-    for (auto &p: haveGreaterIVDistance) {
+    std::cout << "Compatible platoons with shorter inter-vehicle distances:" << std::endl;
+    for (auto &p: haveLowerIVDistance) {
         for (auto &v : p->vehicles) {
             if (v != p->getLeader()) {
                 std::cout << "[ " << v->precedingVehicle.second << " m ] ";
@@ -216,6 +216,7 @@ Cfd::getDragCoefficientReduction_Impl(const std::string &vehicleType,
     double y2 = ((x2 - x1) * (y3 - y1)) / (x3 - x1) + y1;
 
 #ifdef DEBUG_ALGORITHM
+    std::cout << "[Interpolated values]:" << std::endl;
     std::cout << x1 << "m [" << x2 << "m] " << x3 << "m" << std::endl;
     std::cout << y1 << "% [" << y2 << "%] " << y3 << "%" << std::endl;
 #endif
