@@ -126,9 +126,9 @@ Cfd::getDragCoefficientReduction_Impl(const std::string &vehicleType,
                                       const double interVehicleDistance) const {
 #ifdef DEBUG_ALGORITHM
     std::cout << "getDragCoefficient" << std::endl;
-    std::cout << "\tVehicle type: " << vehicleType << std::endl;
+    std::cout << "\tVehicle's type: " << vehicleType << std::endl;
     if (!precedingVehiclesTypes.empty()) {
-        std::cout << "\tPreceding vehicles types: ";
+        std::cout << "\tPreceding vehicles' types: ";
         for (auto &type: precedingVehiclesTypes) {
             std::cout << type << " ";
         }
@@ -187,7 +187,7 @@ Cfd::getDragCoefficientReduction_Impl(const std::string &vehicleType,
             if (v != p->getLeader()) {
                 std::cout << "[ " << v->precedingVehicle.second << " m ] ";
             }
-            std::cout << v->vehicleType << " ( " << v->dragCoefficientReduction << "% ) ";
+            std::cout << v->vehicleType << ", " << v->dragCoefficientReduction <<"% ";
         }
         std::cout << std::endl;
     }
@@ -197,7 +197,7 @@ Cfd::getDragCoefficientReduction_Impl(const std::string &vehicleType,
             if (v != p->getLeader()) {
                 std::cout << "[ " << v->precedingVehicle.second << " m ] ";
             }
-            std::cout << v->vehicleType << " ( " << v->dragCoefficientReduction << "% ) ";
+            std::cout << v->vehicleType << ", " << v->dragCoefficientReduction << "% ";
         }
         std::cout << std::endl;
     }
