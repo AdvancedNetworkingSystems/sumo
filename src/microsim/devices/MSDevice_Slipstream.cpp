@@ -95,7 +95,7 @@ MSDevice_Slipstream::cleanup() {
 MSDevice_Slipstream::MSDevice_Slipstream(SUMOVehicle& holder, const std::string& id, const double myRefDragCoefficient) :
         MSVehicleDevice(holder, id),
         myRefDragCoefficient(myRefDragCoefficient),
-        myDragCoefficient(-1.){
+        myDragCoefficient(myRefDragCoefficient){
 #ifdef DEBUG_INIT
     std::cout << "initialized device '" << id << "' with myDragCoefficient=" << myDragCoefficient << ", myRefDragCoefficient=" << this->myRefDragCoefficient << std::endl;
 #endif
