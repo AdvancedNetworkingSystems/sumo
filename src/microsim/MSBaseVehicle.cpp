@@ -19,6 +19,11 @@
 ///
 // A base class for vehicle implementations
 /****************************************************************************/
+
+
+// ===========================================================================
+// included modules
+// ===========================================================================
 #include <config.h>
 
 #include <iostream>
@@ -42,6 +47,7 @@
 #include "devices/MSDevice.h"
 #include "devices/MSDevice_Routing.h"
 #include "devices/MSDevice_Battery.h"
+#include "devices/MSDevice_Slipstream.h"
 #include <microsim/lcmodels/MSAbstractLaneChangeModel.h>
 #include <microsim/devices/MSRoutingEngine.h>
 #include <microsim/devices/MSDevice_Transportable.h>
@@ -912,6 +918,11 @@ MSBaseVehicle::createDevice(const std::string& deviceName) {
                 assert(routingDevice != 0);
                 routingDevice->notifyEnter(*this, MSMoveReminder::NOTIFICATION_DEPARTED);
             }
+        } else if (deviceName == "slipstream") {
+            ((SUMOVehicleParameter*)myParameter)->setParameter("has." + deviceName + ".device", "true");
+            MSDevice_Slipstream::buildVehicleDevices(*this, myDevices);
+            MSDevice_Slipstream* slipstream = static_cast<MSDevice_Slipstream*>(getDevice(typeid(MSDevice_Slipstream)));
+            myMoveReminders.push_back(std::make_pair(slipstream, 0.));
         } else {
             throw InvalidArgument("Creating device of type '" + deviceName + "' is not supported");
         }
