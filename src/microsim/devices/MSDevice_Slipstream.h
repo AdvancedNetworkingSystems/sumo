@@ -137,7 +137,8 @@ private:
     // private state members of the Slipstream device
 
     /// @brief the vehicle's predecessors
-    std::vector<std::pair<const MSVehicle* const, double>> precedingVehicles;
+    std::vector<const MSVehicle*> precedingVehicles;
+    std::vector<double> precedingVehiclesDistances;
 
 
 

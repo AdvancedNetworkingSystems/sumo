@@ -115,14 +115,14 @@ void MSDevice_Slipstream::computeDragCoefficient() {
     std::string vehicleType = getHolder().getVehicleType().getOriginalID();
 
     std::vector<std::string> precedingVehiclesTypes;
-    for (auto& item : precedingVehicles) {
-        precedingVehiclesTypes.push_back(item.first->getVehicleType().getOriginalID());
+    for (auto& veh : precedingVehicles) {
+        precedingVehiclesTypes.push_back(veh->getVehicleType().getOriginalID());
     }
 
     double interVehicleDistance = 0;
     if (! precedingVehicles.empty()) {
         // Todo: make sure that all the preceding vehicles have (roughly) the same mutual distance
-        interVehicleDistance = precedingVehicles.front().second;
+        interVehicleDistance = precedingVehiclesDistances.front();
     }
 
     double reduction = Cfd::getDragCoefficientReduction(vehicleType, precedingVehiclesTypes, interVehicleDistance);
@@ -147,6 +147,7 @@ MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
 #endif
 
     precedingVehicles.clear();
+    precedingVehiclesDistances.clear();
 
     double remaining = MAX_TOT_DIST;
 
@@ -171,17 +172,19 @@ MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
             break;
         }
 
-        precedingVehicles.push_back(leader);
+        precedingVehicles.push_back(leader.first);
+        precedingVehiclesDistances.push_back(leader.second);
         remaining -= gapAndLength;
         last = leader.first;
     }
 
 #ifdef DEBUG_PRECEDING_VEHICLES
     std::cout << "Preceding vehicles: " << std::endl;
+    assert (precedingVehiclesDistances.size() == precedingVehicles.size());
     if (!precedingVehicles.empty()) {
-        for(auto& item : precedingVehicles)
+        for(int i = 0; i < precedingVehicles.size(); i++)
         {
-            std::cout << "[" << item.second << " m] " << item.first->getID() << " ";
+            std::cout << "[" << precedingVehiclesDistances.at(i) << " m] " << precedingVehicles.at(i)->getID() << " ";
         }
         std::cout << std::endl;
     } else {
