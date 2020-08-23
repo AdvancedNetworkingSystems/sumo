@@ -121,6 +121,9 @@ protected:
     /// @brief computes and updates the vehicle's current drag coefficient
     void computeDragCoefficient();
 
+    /// @brief computes the preceding vehicles and their distances
+    void computePrecedingVehicles(const MSVehicle* veh);
+
 
 
 private:

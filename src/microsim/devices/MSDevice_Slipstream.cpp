@@ -39,6 +39,7 @@
 
 // Debug switches
 #define DEBUG_INIT
+#define DEBUG_NOTIFY_MOVE
 #define DEBUG_PRECEDING_VEHICLES
 #define DEBUG_DRAG_COEFFICIENT
 
@@ -135,22 +136,9 @@ void MSDevice_Slipstream::computeDragCoefficient() {
 }
 
 
-bool
-MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
-                             double /* newPos */, double /* newSpeed */) {
-    if (!tObject.isVehicle()) {
-        return false;
-    }
-    MSVehicle* veh = static_cast<MSVehicle*>(&tObject);
-#ifdef DEBUG_PRECEDING_VEHICLES
-    std::cout << "device '" << getID() << "' notifyMove" << std::endl;
-#endif
-
+void MSDevice_Slipstream::computePrecedingVehicles(const MSVehicle* veh) {
     precedingVehicles.clear();
-    succeedingVehicles.clear();
-
     precedingDistances.clear();
-    succeedingDistances.clear();
 
     double remaining = MAX_TOT_DIST;
 
@@ -194,6 +182,24 @@ MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
         std::cout << "No preceding vehicles." << std::endl;
     }
 #endif
+}
+
+
+bool
+MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
+                             double /* newPos */, double /* newSpeed */) {
+    if (!tObject.isVehicle()) {
+        return false;
+    }
+    MSVehicle* veh = static_cast<MSVehicle*>(&tObject);
+
+#ifdef DEBUG_NOTIFY_MOVE
+    std::cout << "device '" << getID() << "' notifyMove" << std::endl;
+#endif
+
+    computePrecedingVehicles(veh);
+    succeedingVehicles.clear();
+    succeedingDistances.clear();
 
     computeDragCoefficient();
 
