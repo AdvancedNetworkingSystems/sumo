@@ -122,7 +122,7 @@ void MSDevice_Slipstream::computeDragCoefficient() {
     double interVehicleDistance = 0;
     if (! precedingVehicles.empty()) {
         // Todo: make sure that all the preceding vehicles have (roughly) the same mutual distance
-        interVehicleDistance = precedingVehiclesDistances.front();
+        interVehicleDistance = precedingDistances.front();
     }
 
     double reduction = Cfd::getDragCoefficientReduction(vehicleType, precedingVehiclesTypes, interVehicleDistance);
@@ -147,7 +147,10 @@ MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
 #endif
 
     precedingVehicles.clear();
-    precedingVehiclesDistances.clear();
+    succeedingVehicles.clear();
+
+    precedingDistances.clear();
+    succeedingDistances.clear();
 
     double remaining = MAX_TOT_DIST;
 
@@ -173,18 +176,18 @@ MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
         }
 
         precedingVehicles.push_back(leader.first);
-        precedingVehiclesDistances.push_back(leader.second);
+        precedingDistances.push_back(leader.second);
         remaining -= gapAndLength;
         last = leader.first;
     }
 
 #ifdef DEBUG_PRECEDING_VEHICLES
     std::cout << "Preceding vehicles: " << std::endl;
-    assert (precedingVehiclesDistances.size() == precedingVehicles.size());
+    assert (precedingDistances.size() == precedingVehicles.size());
     if (!precedingVehicles.empty()) {
         for(int i = 0; i < precedingVehicles.size(); i++)
         {
-            std::cout << "[" << precedingVehiclesDistances.at(i) << " m] " << precedingVehicles.at(i)->getID() << " ";
+            std::cout << "[" << precedingDistances.at(i) << " m] " << precedingVehicles.at(i)->getID() << " ";
         }
         std::cout << std::endl;
     } else {

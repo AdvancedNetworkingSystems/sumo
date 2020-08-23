@@ -138,7 +138,13 @@ private:
 
     /// @brief the vehicle's predecessors
     std::vector<const MSVehicle*> precedingVehicles;
-    std::vector<double> precedingVehiclesDistances;
+    /// @brief the vehicle's successors
+    std::vector<const MSVehicle*> succeedingVehicles;
+
+    /// @brief distances between the preceding vehicles
+    std::vector<double> precedingDistances;
+    /// @brief distances between the succeeding vehicles
+    std::vector<double> succeedingDistances;
 
 
 
