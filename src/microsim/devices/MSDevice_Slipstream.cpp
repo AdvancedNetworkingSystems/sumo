@@ -30,6 +30,7 @@
 #include <utils/iodevices/OutputDevice.h>
 #include <utils/vehicle/SUMOVehicle.h>
 #include <microsim/MSEdge.h>
+#include <microsim/MSLane.h>
 #include <microsim/MSVehicle.h>
 #include "MSDevice_Tripinfo.h"
 #include "MSDevice_Slipstream.h"
@@ -41,6 +42,7 @@
 #define DEBUG_INIT
 #define DEBUG_NOTIFY_MOVE
 #define DEBUG_PRECEDING_VEHICLES
+#define DEBUG_SUCCEEDING_VEHICLES
 #define DEBUG_DRAG_COEFFICIENT
 
 // Constants
@@ -173,8 +175,7 @@ void MSDevice_Slipstream::computePrecedingVehicles(const MSVehicle* veh) {
     std::cout << "Preceding vehicles: " << std::endl;
     assert (precedingDistances.size() == precedingVehicles.size());
     if (!precedingVehicles.empty()) {
-        for(int i = 0; i < precedingVehicles.size(); i++)
-        {
+        for(unsigned long i = 0; i < precedingVehicles.size(); i++) {
             std::cout << "[" << precedingDistances.at(i) << " m] " << precedingVehicles.at(i)->getID() << " ";
         }
         std::cout << std::endl;
@@ -188,6 +189,47 @@ void MSDevice_Slipstream::computePrecedingVehicles(const MSVehicle* veh) {
 void MSDevice_Slipstream::computeSucceedingVehicles(const MSVehicle* veh) {
     succeedingVehicles.clear();
     succeedingDistances.clear();
+
+    double remaining = MAX_TOT_DIST;
+
+    const MSVehicle* last = veh;
+    while (remaining > 0.) {
+        std::pair<const MSVehicle* const, double> follower = last->getLane()->getFollower(last, last->getPositionOnLane(), 2*MAX_GAP, false);
+
+        if (follower.first == nullptr)
+            break;
+        if (follower.second > MAX_GAP) {
+#ifdef DEBUG_SUCCEEDING_VEHICLES
+            std::cout << follower.first->getID() << "'s gap from " << last->getID() << " exceeds maximum by " << follower.second - MAX_GAP << std::endl;
+#endif
+            break;
+        }
+        double gapAndLength = follower.second + follower.first->getLength();
+        if (remaining - gapAndLength < 0.) {
+#ifdef DEBUG_SUCCEEDING_VEHICLES
+            std::cout << follower.first->getID() << "'s distance from " << veh->getID() << " exceeds maximum by " << gapAndLength - remaining << std::endl;
+#endif
+            break;
+        }
+
+        succeedingVehicles.push_back(follower.first);
+        succeedingDistances.push_back(follower.second);
+        remaining -= gapAndLength;
+        last = follower.first;
+    }
+
+#ifdef DEBUG_SUCCEEDING_VEHICLES
+    std::cout << "Succeeding vehicles: " << std::endl;
+    assert (succeedingVehicles.size() == succeedingDistances.size());
+    if (!succeedingVehicles.empty()) {
+        for(unsigned long i = 0; i < succeedingVehicles.size(); i++) {
+            std::cout << "[" << succeedingDistances.at(i) << " m] " << succeedingVehicles.at(i)->getID() << " ";
+        }
+        std::cout << std::endl;
+    } else {
+        std::cout << "No succeeding vehicles." << std::endl;
+    }
+#endif
 }
 
 
