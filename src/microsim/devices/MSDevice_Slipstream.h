@@ -124,6 +124,9 @@ protected:
     /// @brief computes the preceding vehicles and their distances
     void computePrecedingVehicles(const MSVehicle* veh);
 
+    /// @brief computes the succeeding vehicles and their distances
+    void computeSucceedingVehicles(const MSVehicle* veh);
+
 
 
 private:

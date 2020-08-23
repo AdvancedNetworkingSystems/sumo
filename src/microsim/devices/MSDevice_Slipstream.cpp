@@ -185,6 +185,12 @@ void MSDevice_Slipstream::computePrecedingVehicles(const MSVehicle* veh) {
 }
 
 
+void MSDevice_Slipstream::computeSucceedingVehicles(const MSVehicle* veh) {
+    succeedingVehicles.clear();
+    succeedingDistances.clear();
+}
+
+
 bool
 MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
                              double /* newPos */, double /* newSpeed */) {
@@ -198,8 +204,7 @@ MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
 #endif
 
     computePrecedingVehicles(veh);
-    succeedingVehicles.clear();
-    succeedingDistances.clear();
+    computeSucceedingVehicles(veh);
 
     computeDragCoefficient();
 
