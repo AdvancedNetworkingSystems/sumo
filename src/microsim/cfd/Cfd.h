@@ -19,8 +19,9 @@
 #ifndef Cfd_h
 #define Cfd_h
 
-#include "CfdVehicle.h"
-#include "CfdPlatoon.h"
+#include <vector>
+#include <set>
+#include "Record.h"
 
 class Cfd {
 
@@ -35,24 +36,26 @@ public:
         return instance;
     }
 
-    static double getDragCoefficientReduction(const std::string &vehicleType,
-                                              const std::vector<std::string> &precedingVehiclesTypes,
-                                              const double interVehicleDistance) {
-        return getInstance().getDragCoefficientReduction_Impl(vehicleType,
-                                                              precedingVehiclesTypes,
-                                                              interVehicleDistance);
+    /** @brief Returns an estimation of the ratio by which a platooning vehicle's drag coefficient should change
+     *  @param t The platoon's vehicle types
+     *  @param d Each vehicle's distance from its predecessor
+     *  @param i Target vehicle's index
+     */
+    static double getDragCoefficientRatio(const std::vector<std::string> &t,
+                                          const std::vector<double> &d,
+                                          unsigned int i) {
+        return getInstance().getDragCoefficientRatio_Impl(t, d, i);
     }
 
 
 private:
-
-    std::set<CfdPlatoon *> platoons;
+    std::set<Record *> records;
 
     Cfd();
 
-    double getDragCoefficientReduction_Impl(const std::string &vehicleType,
-                                            const std::vector<std::string> &precedingVehiclesTypes,
-                                            const double interVehicleDistance) const;
+    double getDragCoefficientRatio_Impl(const std::vector<std::string> &t,
+                                        const std::vector<double> &d,
+                                        unsigned int i) const;
 };
 
 

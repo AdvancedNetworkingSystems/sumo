@@ -115,23 +115,6 @@ double MSDevice_Slipstream::getDragCoefficient() const {
 
 
 void MSDevice_Slipstream::computeDragCoefficient() {
-    std::string vehicleType = getHolder().getVehicleType().getOriginalID();
-
-    std::vector<std::string> precedingVehiclesTypes;
-    for (auto& veh : precedingVehicles) {
-        precedingVehiclesTypes.push_back(veh->getVehicleType().getOriginalID());
-    }
-
-    double interVehicleDistance = 0;
-    if (! precedingVehicles.empty()) {
-        // Todo: make sure that all the preceding vehicles have (roughly) the same mutual distance
-        interVehicleDistance = precedingDistances.front();
-    }
-
-    double reduction = Cfd::getDragCoefficientReduction(vehicleType, precedingVehiclesTypes, interVehicleDistance);
-
-    myDragCoefficient = myRefDragCoefficient * (100. + reduction) / 100;
-
 #ifdef DEBUG_DRAG_COEFFICIENT
     std::cout << "Drag coefficient: " << myRefDragCoefficient << " -> " << myDragCoefficient << std::endl;
 #endif

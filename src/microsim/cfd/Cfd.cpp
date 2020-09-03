@@ -19,11 +19,10 @@
 
 #include <fstream>
 #include <sstream>
-#include <algorithm> // sort
+#include <iostream>
+#include <utils/common/UtilExceptions.h>
 
 #include "Cfd.h"
-#include "CfdVehicle.h"
-#include "CfdPlatoon.h"
 
 #define DEBUG_PARSE_FILE
 #define DEBUG_ALGORITHM
@@ -34,16 +33,15 @@ Cfd::Cfd() {
         throw ProcessError("File 'data.txt' not found");
 
     enum STATE {
-        CLASSES,
+        TYPES,
         DISTANCES,
-        REDUCTIONS,
+        RATIOS,
         SAVE
     };
-    STATE currentState = CLASSES;
 
-    std::vector<std::string> types;
-    std::vector<double> distances;
-    std::vector<double> reductions;
+    STATE currentState = TYPES;
+
+    Record *record = nullptr;
 
     std::string currLine;
     while (std::getline(file, currLine)) {
@@ -52,174 +50,70 @@ Cfd::Cfd() {
             continue;
 
         std::stringstream ss(currLine);
-        if (currentState == CLASSES) {
-            std::string type;
-            while (ss >> type) {
-                // Todo verify that types exist
-                types.push_back(type);
+
+        if (currentState == TYPES) {
+            // Allocate a new record on demand
+            record = new Record();
+            records.insert(record);
+
+            // The vehicle's type
+            std::string t;
+            while (ss >> t) {
+                record->t.push_back(t);
             }
-            if (types.size() < 2) {
-                throw ProcessError("The provided platoon has less than 2 vehicles");
+
+            if (record->t.size() < 2) {
+                throw ProcessError("The platoon requires at least 2 vehicles");
             }
             currentState = DISTANCES;
         } else if (currentState == DISTANCES) {
-            double distance;
-            while (ss >> distance) {
-                if (distances.size() >= 2) {
-                    if (distance != distances.back()) // Thesis simplification: enforce same inter-vehicle distances
-                        throw ProcessError("The provided inter-vehicle distances are different");
-                }
-                distances.push_back(distance);
-            }
-            currentState = REDUCTIONS;
-        } else { // if (currentState == REDUCTIONS) {
-            double reduction;
-            while (ss >> reduction) {
-                reductions.push_back(reduction);
+            // The first vehicle has no predecessors
+            record->d.push_back(0.);
+
+            // The vehicle's distance from the predecessor
+            double d;
+            while (ss >> d) {
+                record->d.push_back(d);
             }
 
-            auto *platoon = new CfdPlatoon();
-            for (int i = 0; i < (int) types.size(); i++)
-                platoon->addVehicle(types[i], distances[i], reductions[i]);
-            platoon->interVehicleDistance = platoon->getLast()->precedingVehicle.second;
-            platoons.insert(platoon);
+            if (record->d.size() != record->t.size()) {
+                throw ProcessError(
+                        "The platoon requires " + std::to_string(record->t.size() - 1) + " inter-vehicle distances");
+            }
+            currentState = RATIOS;
+        } else {
+            // The vehicle's drag coefficient ratio
+            double r;
+            while (ss >> r) {
+                record->r.push_back(r);
+            }
 
-            types.clear();
-            distances.clear();
-            reductions.clear();
-            currentState = CLASSES;
+            if (record->r.size() != record->t.size()) {
+                throw ProcessError(
+                        "The platoon requires " + std::to_string(record->t.size()) + " drag coefficient ratios");
+            }
+            currentState = TYPES;
         }
     }
     file.close();
 
 #ifdef DEBUG_PARSE_FILE
-    std::cout << "=== Cfd constructor ===" << std::endl;
+    std::cout << "=== Cfd constructor ===\n";
 
-    for (CfdPlatoon *platoon : platoons) {
-        std::cout << "Parsed platoon: " << std::endl;
-        CfdVehicle *vehicle = platoon->getLeader();
-        while (vehicle != nullptr) {
-            std::cout << "* Vehicle:" << std::endl;
-            std::cout << "    Class: " << vehicle->vehicleType << std::endl;
-            if (vehicle->precedingVehicle.first != nullptr) {
-                std::cout << "    Pred: "
-                          << vehicle->precedingVehicle.first->vehicleType
-                          << " [" << vehicle->precedingVehicle.second << " m]" << std::endl;
-            }
-            if (vehicle->succeedingVehicle.first != nullptr) {
-                std::cout << "    Succ: "
-                          << vehicle->succeedingVehicle.first->vehicleType
-                          << " [" << vehicle->succeedingVehicle.second << " m]" << std::endl;
-            }
-            std::cout << "    Reduction: " << vehicle->dragCoefficientReduction << "%" << std::endl;
-
-            vehicle = vehicle->succeedingVehicle.first;
-        }
+    for (const Record *r : records) {
+        std::cout << "Parsed platoon:\n";
+        std::cout << *r << "\n";
     }
 #endif
 }
 
-// Todo: this is a very primitive implementation, and it does not consider succeeding vehicles
 double
-Cfd::getDragCoefficientReduction_Impl(const std::string &vehicleType,
-                                      const std::vector<std::string> &precedingVehiclesTypes,
-                                      const double interVehicleDistance) const {
+Cfd::getDragCoefficientRatio_Impl(const std::vector<std::string> &t,
+                                  const std::vector<double> &d,
+                                  unsigned int i) const {
 #ifdef DEBUG_ALGORITHM
     std::cout << "getDragCoefficient" << std::endl;
-    std::cout << "\tVehicle's type: " << vehicleType << std::endl;
-    if (!precedingVehiclesTypes.empty()) {
-        std::cout << "\tPreceding vehicles' types: ";
-        for (auto &type: precedingVehiclesTypes) {
-            std::cout << type << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "\tInter-vehicle distance: " << interVehicleDistance << std::endl;
 #endif
 
-    std::vector<std::string> vehicleTypes(precedingVehiclesTypes.rbegin(), precedingVehiclesTypes.rend());
-    vehicleTypes.push_back(vehicleType);
-
-    std::vector<CfdPlatoon *> haveCompatibleGeometry;
-    for (auto &platoon : platoons) {
-        if (platoon->startsWith(vehicleTypes)) {
-            haveCompatibleGeometry.push_back(platoon);
-        }
-    }
-
-    std::vector<CfdPlatoon *> haveLowerIVDistance;
-    std::vector<CfdPlatoon *> haveGreaterIVDistance;
-    for (auto &p : haveCompatibleGeometry) {
-        if (p->interVehicleDistance < interVehicleDistance) {
-            haveLowerIVDistance.push_back(p);
-        } else {
-            haveGreaterIVDistance.push_back(p);
-        }
-    }
-    std::sort(haveLowerIVDistance.begin(), haveLowerIVDistance.end(),
-              [](const CfdPlatoon *p1, const CfdPlatoon *p2) {
-                  return p1->interVehicleDistance < p2->interVehicleDistance;
-              });
-    std::sort(haveGreaterIVDistance.begin(), haveGreaterIVDistance.end(),
-              [](const CfdPlatoon *p1, const CfdPlatoon *p2) {
-                  return p1->interVehicleDistance < p2->interVehicleDistance;
-              });
-
-
-    if (haveLowerIVDistance.empty()) {
-#ifdef DEBUG_ALGORITHM
-        std::cout
-                << "There is no CFD data about platoons that have a compatible geometry and have a lower inter-vehicle distance" << std::endl;
-#endif
-        return 0.;
-    }
-    if (haveGreaterIVDistance.empty()) {
-#ifdef DEBUG_ALGORITHM
-        std::cout
-                << "There is no CFD data about platoons that have a compatible geometry and have a greater inter-vehicle distance" << std::endl;
-#endif
-        return 0.;
-    }
-#ifdef DEBUG_ALGORITHM
-    std::cout << "Compatible platoons with longer inter-vehicle distances:" << std::endl;
-    for (auto &p: haveGreaterIVDistance) {
-        for (auto &v : p->vehicles) {
-            if (v != p->getLeader()) {
-                std::cout << "[ " << v->precedingVehicle.second << " m ] ";
-            }
-            std::cout << v->vehicleType << ", " << v->dragCoefficientReduction <<"% ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "Compatible platoons with shorter inter-vehicle distances:" << std::endl;
-    for (auto &p: haveLowerIVDistance) {
-        for (auto &v : p->vehicles) {
-            if (v != p->getLeader()) {
-                std::cout << "[ " << v->precedingVehicle.second << " m ] ";
-            }
-            std::cout << v->vehicleType << ", " << v->dragCoefficientReduction << "% ";
-        }
-        std::cout << std::endl;
-    }
-#endif
-
-    int pos = (int) vehicleTypes.size() - 1;
-
-    double x1 = haveGreaterIVDistance.front()->interVehicleDistance;
-    double y1 = haveGreaterIVDistance.front()->getMember(pos)->dragCoefficientReduction;
-
-    double x2 = interVehicleDistance;
-
-    double x3 = haveLowerIVDistance.back()->interVehicleDistance;
-    double y3 = haveLowerIVDistance.back()->getMember(pos)->dragCoefficientReduction;
-
-    double y2 = ((x2 - x1) * (y3 - y1)) / (x3 - x1) + y1;
-
-#ifdef DEBUG_ALGORITHM
-    std::cout << "[Interpolated values]:" << std::endl;
-    std::cout << x1 << "m [" << x2 << "m] " << x3 << "m" << std::endl;
-    std::cout << y1 << "% [" << y2 << "%] " << y3 << "%" << std::endl;
-#endif
-
-    return y2;
+    return 1.;
 }

@@ -1,8 +1,6 @@
 set(microsim_cfd_STAT_SRCS
-        CfdVehicle.cpp
-        CfdVehicle.h
-        CfdPlatoon.cpp
-        CfdPlatoon.h
+        Record.cpp
+        Record.h
         Cfd.cpp
         Cfd.h
 )
