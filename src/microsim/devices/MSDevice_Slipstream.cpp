@@ -115,6 +115,24 @@ double MSDevice_Slipstream::getDragCoefficient() const {
 
 
 void MSDevice_Slipstream::computeDragCoefficient() {
+    std::vector<std::string> t;
+    std::vector<double> d;
+
+    for (int i = (int) precedingVehicles.size() -1   ; i >= 0; i--) {
+        t.push_back(precedingVehicles[i]->getVehicleType().getOriginalID());
+    }
+    t.push_back(getHolder().getVehicleType().getOriginalID());
+    for (int i = 0; i < (int) succeedingVehicles.size(); i++) {
+        t.push_back(succeedingVehicles[i]->getVehicleType().getOriginalID());
+    }
+
+    d.push_back(0.);
+    std::reverse_copy(precedingDistances.begin(), precedingDistances.end(), std::back_inserter(d));
+    std::copy(succeedingDistances.begin(), succeedingDistances.end(), std::back_inserter(d));
+
+    double ratio = Cfd::getDragCoefficientRatio(t, d, (unsigned int) precedingVehicles.size());
+    myDragCoefficient = ratio * myRefDragCoefficient;
+
 #ifdef DEBUG_DRAG_COEFFICIENT
     std::cout << "Drag coefficient: " << myRefDragCoefficient << " -> " << myDragCoefficient << std::endl;
 #endif
@@ -218,7 +236,7 @@ void MSDevice_Slipstream::computeSucceedingVehicles(const MSVehicle* veh) {
 
 bool
 MSDevice_Slipstream::notifyMove(SUMOTrafficObject& tObject, double /* oldPos */,
-                             double /* newPos */, double /* newSpeed */) {
+                                double /* newPos */, double /* newSpeed */) {
     if (!tObject.isVehicle()) {
         return false;
     }
