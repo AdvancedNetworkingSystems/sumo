@@ -36,26 +36,53 @@ public:
         return instance;
     }
 
-    /** @brief Returns an estimation of the ratio by which a platooning vehicle's drag coefficient should change
+    /** @brief Estimates the ratio by which a vehicle's drag coefficient should change due to platooning
      *  @param t The platoon's vehicle types
      *  @param d Each vehicle's distance from its predecessor
      *  @param i Target vehicle's index
      */
-    static double getDragCoefficientRatio(const std::vector<std::string> &t,
-                                          const std::vector<double> &d,
-                                          unsigned int i) {
+    static double getDragCoefficientRatio(const std::vector<std::string> &t, const std::vector<double> &d, unsigned int i) {
         return getInstance().getDragCoefficientRatio_Impl(t, d, i);
     }
 
 
 private:
-    std::set<Record *> records;
+    std::set<const Record *> records;
 
     Cfd();
 
     double getDragCoefficientRatio_Impl(const std::vector<std::string> &t,
                                         const std::vector<double> &d,
-                                        unsigned int i) const;
+                                        const unsigned int p) const;
+
+
+    /**
+     * @brief Progressively refines the set of records R. See Algorithm 1
+     * @param R Set of records to be refined
+     * @param d Each vehicle's distance from its predecessor
+     * @param p Target vehicle's index
+     */
+    void
+    searchRecords(std::set<const Record *> &R, const std::vector<double> &d, const unsigned int p) const;
+
+    /**
+     * @brief Search procedure towards the platoon's head. See Algorithm 2
+     * @param R Set of record to be refined
+     * @param d Each vehicle's distance from its predecessor
+     * @param k Position from which to start searching
+     */
+    void
+    searchToHead(std::set<const Record *> &R, const std::vector<double> &d, unsigned int k) const;
+
+    /**
+     * @brief Search procedure towards the platoon's tail. See Algorithm 2
+     * @param R Set of record to be refined
+     * @param d Each vehicle's distance from its predecessor
+     * @param k Position from which to start searching
+     */
+    void
+    searchToTail(std::set<const Record *> &R, const std::vector<double> &d, unsigned int k) const;
+
 };
 
 

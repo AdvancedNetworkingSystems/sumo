@@ -130,7 +130,10 @@ void MSDevice_Slipstream::computeDragCoefficient() {
     std::reverse_copy(precedingDistances.begin(), precedingDistances.end(), std::back_inserter(d));
     std::copy(succeedingDistances.begin(), succeedingDistances.end(), std::back_inserter(d));
 
-    double ratio = Cfd::getDragCoefficientRatio(t, d, (unsigned int) precedingVehicles.size());
+    double ratio = 1;
+    if (t.size() > 1) {
+        ratio = Cfd::getDragCoefficientRatio(t, d, precedingVehicles.size());
+    }
     myDragCoefficient = ratio * myRefDragCoefficient;
 
 #ifdef DEBUG_DRAG_COEFFICIENT
