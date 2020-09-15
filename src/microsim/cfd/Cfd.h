@@ -41,7 +41,7 @@ public:
      *  @param d Each vehicle's distance from its predecessor
      *  @param i Target vehicle's index
      */
-    static double getDragCoefficientRatio(const std::vector<std::string> &t, const std::vector<double> &d, unsigned int i) {
+    static double getDragCoefficientRatio(const std::vector<std::string> &t, const std::vector<double> &d, int i) {
         return getInstance().getDragCoefficientRatio_Impl(t, d, i);
     }
 
@@ -53,7 +53,7 @@ private:
 
     double getDragCoefficientRatio_Impl(const std::vector<std::string> &t,
                                         const std::vector<double> &d,
-                                        const unsigned int p) const;
+                                        const int p) const;
 
 
     /**
@@ -63,7 +63,7 @@ private:
      * @param p Target vehicle's index
      */
     void
-    searchRecords(std::set<const Record *> &R, const std::vector<double> &d, const unsigned int p) const;
+    searchRecords(std::set<const Record *> &R, const std::vector<double> &d, const int p) const;
 
     /**
      * @brief Search procedure towards the platoon's head. See Algorithm 2
@@ -72,7 +72,7 @@ private:
      * @param k Position from which to start searching
      */
     void
-    searchToHead(std::set<const Record *> &R, const std::vector<double> &d, unsigned int k) const;
+    searchToHead(std::set<const Record *> &R, const std::vector<double> &d, int k) const;
 
     /**
      * @brief Search procedure towards the platoon's tail. See Algorithm 2
@@ -81,7 +81,7 @@ private:
      * @param k Position from which to start searching
      */
     void
-    searchToTail(std::set<const Record *> &R, const std::vector<double> &d, unsigned int k) const;
+    searchToTail(std::set<const Record *> &R, const std::vector<double> &d, int k) const;
 
 };
 

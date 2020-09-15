@@ -111,7 +111,7 @@ Cfd::Cfd() {
 }
 
 double
-Cfd::getDragCoefficientRatio_Impl(const std::vector<std::string> &t, const std::vector<double> &d, const unsigned int p) const {
+Cfd::getDragCoefficientRatio_Impl(const std::vector<std::string> &t, const std::vector<double> &d, const int p) const {
 #ifdef DEBUG_ALGORITHM
     std::cout << "getDragCoefficient\n";
 #endif
@@ -204,8 +204,8 @@ Cfd::getDragCoefficientRatio_Impl(const std::vector<std::string> &t, const std::
 }
 
 void
-Cfd::searchRecords(std::set<const Record *> &R, const std::vector<double> &d, const unsigned int p) const {
-    const unsigned int N = (unsigned int) d.size();
+Cfd::searchRecords(std::set<const Record *> &R, const std::vector<double> &d, const int p) const {
+    const int N = (const int) d.size();
     assert(p >= 0); // First vehicle
     assert(p <= N - 1); // Last vehicle
 
@@ -214,7 +214,7 @@ Cfd::searchRecords(std::set<const Record *> &R, const std::vector<double> &d, co
 
     double delta_R_min = std::numeric_limits<double>::max();
 
-    unsigned int k = 1;
+    int k = 1;
     while (R.size() > 1 && p - k >= 0 && p + k <= N - 1) {
         for (auto it = R.begin(); it != R.end();) {
             double eps_f = (*it)->d[p - k + 1] - d[p - k + 1]; // Eq. (13)
@@ -256,11 +256,11 @@ Cfd::searchRecords(std::set<const Record *> &R, const std::vector<double> &d, co
 }
 
 void
-Cfd::searchToTail(std::set<const Record *> &R, const std::vector<double> &d, unsigned int k) const {
+Cfd::searchToTail(std::set<const Record *> &R, const std::vector<double> &d, int k) const {
 #ifdef DEBUG_ALGORITHM
     std::cout << "searchToTail\n";
 #endif
-    const unsigned int N = (unsigned int) d.size();
+    const int N = (int) d.size();
 
     double val_min = std::numeric_limits<double>::max();
 
@@ -273,8 +273,8 @@ Cfd::searchToTail(std::set<const Record *> &R, const std::vector<double> &d, uns
                 it = R.erase(it);
                 continue;
             }
-            // Remove all the previous records
             if (val < val_min) {
+                // Remove all the previous records
                 it = R.erase(R.begin(), it);
                 val_min = val;
                 continue;
@@ -286,7 +286,7 @@ Cfd::searchToTail(std::set<const Record *> &R, const std::vector<double> &d, uns
 }
 
 void
-Cfd::searchToHead(std::set<const Record *> &R, const std::vector<double> &d, unsigned int k) const {
+Cfd::searchToHead(std::set<const Record *> &R, const std::vector<double> &d, int k) const {
 #ifdef DEBUG_ALGORITHM
     std::cout << "searchToHead\n";
 #endif
@@ -301,8 +301,8 @@ Cfd::searchToHead(std::set<const Record *> &R, const std::vector<double> &d, uns
                 it = R.erase(it);
                 continue;
             }
-            // Remove all the previous records
             else if (val < val_min) {
+                // Remove all the previous records
                 it = R.erase(R.begin(), it);
                 val_min = val;
                 continue;
